@@ -7,7 +7,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 import android.widget.Toast;
+
+import com.example.mikugo.arduinobluetoothshowcase.adapters.BluetoothDeviceListAdapapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +21,23 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter mBluetoothAdapter;
 
+    private ListView mPairedDevices;
+    private BluetoothDeviceListAdapapter mPairedDevicesAdapter;
+
+    private ListView mAvailableDevices;
+    private BluetoothDeviceListAdapapter mAvailableDevicesAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initBluetooth();
+        mPairedDevices = (ListView) findViewById(R.id.list_paired_devices);
+        mPairedDevicesAdapter = new BluetoothDeviceListAdapapter(this, R.layout.bluetooth_device_list_item, getPairedDevices());
+        mPairedDevices.setAdapter(mPairedDevicesAdapter);
+
+        mPairedDevices = (ListView) findViewById(R.id.list_available_devices);
+
 
     }
 
@@ -51,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         initBluetooth();
+        queryPairedDevices();
 
     }
 
@@ -96,9 +112,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Set<BluetoothDevice> getPairedDevices() {
+    private List<BluetoothDevice> getPairedDevices() {
+        List list = new ArrayList();
+        list.addAll(mBluetoothAdapter.getBondedDevices());
 
-        return mBluetoothAdapter.getBondedDevices();
+        return list;
 
     }
 }
