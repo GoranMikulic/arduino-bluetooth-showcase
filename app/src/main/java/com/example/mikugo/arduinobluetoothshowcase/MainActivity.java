@@ -1,7 +1,7 @@
 package com.example.mikugo.arduinobluetoothshowcase;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,14 +16,15 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.mikugo.arduinobluetoothshowcase.adapters.BluetoothDeviceListAdapapter;
+import com.example.mikugo.arduinobluetoothshowcase.bluetooth.BluetoothManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_ENABLE_BT = 1;
-    private BluetoothAdapter mBluetoothAdapter;
+
+    private BluetoothManager mBtManager;
 
     private ListView mPairedDevices;
     private BluetoothDeviceListAdapapter mPairedDevicesAdapter;
@@ -31,14 +32,17 @@ public class MainActivity extends AppCompatActivity {
     private ListView mAvailableDevices;
     private BluetoothDeviceListAdapapter mAvailableDevicesAdapter;
 
+    private BroadcastReceiver mReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initBluetooth();
+        mBtManager = new BluetoothManager(this);
+        mBtManager.initBluetooth();
 
         mPairedDevices = (ListView) findViewById(R.id.list_paired_devices);
-        mPairedDevicesAdapter = new BluetoothDeviceListAdapapter(this, R.layout.bluetooth_device_list_item, getPairedDevices());
+        mPairedDevicesAdapter = new BluetoothDeviceListAdapapter(this, R.layout.bluetooth_device_list_item, mBtManager.getPairedDevices());
         mPairedDevices.setAdapter(mPairedDevicesAdapter);
         mPairedDevices.setOnItemClickListener(new OnItemClickListener());
 
@@ -47,7 +51,27 @@ public class MainActivity extends AppCompatActivity {
         mAvailableDevices.setAdapter(mAvailableDevicesAdapter);
         mAvailableDevices.setOnItemClickListener(new OnItemClickListener());
 
-        discoverDevices();
+
+        mBtManager.startDiscovery();
+
+        mReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                // When discovery finds a device
+                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    // Get the BluetoothDevice object from the Intent
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    // Add the name and address to an array adapter to show in a ListView
+                    mAvailableDevicesAdapter.add(device);
+                    mAvailableDevicesAdapter.notifyDataSetChanged();
+                }
+            }
+        };
+
+        // Register the BroadcastReceiver
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
 
     }
 
@@ -57,27 +81,11 @@ public class MainActivity extends AppCompatActivity {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             BluetoothDevice btDevice = (BluetoothDevice) mPairedDevices.getItemAtPosition(position);
             Toast.makeText(mPairedDevices.getContext(), "you selected" + btDevice.getName(), Toast.LENGTH_SHORT).show();
+            mBtManager.connect(btDevice);
+
         }
     }
 
-    /**
-     * Initializes bluetooth adapter and checks if bluetooth is enabled
-     */
-    private void initBluetooth() {
-
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        if (mBluetoothAdapter == null) {
-            // Device does not support Bluetooth
-            Toast.makeText(MainActivity.this, "Device does not support Bluetooth", Toast.LENGTH_SHORT).show();
-        }
-
-        if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
-
-    }
 
     @Override
     protected void onResume() {
@@ -88,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initPairedDevicesList() {
-        List<BluetoothDevice> devices = getPairedDevices();
+        List<BluetoothDevice> devices = mBtManager.getPairedDevices();
         mPairedDevicesAdapter.clear();
         mPairedDevicesAdapter.addAll(devices);
         mPairedDevicesAdapter.notifyDataSetChanged();
@@ -119,30 +127,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private List<BluetoothDevice> getPairedDevices() {
-        List pairedDevices = new ArrayList();
-        pairedDevices.addAll(mBluetoothAdapter.getBondedDevices());
-
-        return pairedDevices;
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mReceiver);
+        mBtManager.disconnect();
     }
 
-    private void discoverDevices() {
-        mBluetoothAdapter.startDiscovery();
+    public void initControlActivity(BluetoothSocket socket) {
 
-        BroadcastReceiver mReceiver = new BroadcastReceiver() {
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                // When discovery finds a device
-                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    // Get the BluetoothDevice object from the Intent
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    // Add the name and address to an array adapter to show in a ListView
-                    mAvailableDevicesAdapter.add(device);
-                }
-            }
-        };
-        // Register the BroadcastReceiver
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
     }
 }
