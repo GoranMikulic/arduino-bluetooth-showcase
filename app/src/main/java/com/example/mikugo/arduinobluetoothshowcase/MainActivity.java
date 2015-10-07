@@ -1,7 +1,6 @@
 package com.example.mikugo.arduinobluetoothshowcase;
 
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +12,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.example.mikugo.arduinobluetoothshowcase.adapters.BluetoothDeviceListAdapapter;
 import com.example.mikugo.arduinobluetoothshowcase.bluetooth.BluetoothManager;
@@ -23,6 +21,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_ENABLE_BT = 1;
+    public static final String EXTRA_DEVICE_ADDRESS = "device_address";
 
     private BluetoothManager mBtManager;
 
@@ -44,12 +43,12 @@ public class MainActivity extends AppCompatActivity {
         mPairedDevices = (ListView) findViewById(R.id.list_paired_devices);
         mPairedDevicesAdapter = new BluetoothDeviceListAdapapter(this, R.layout.bluetooth_device_list_item, mBtManager.getPairedDevices());
         mPairedDevices.setAdapter(mPairedDevicesAdapter);
-        mPairedDevices.setOnItemClickListener(new OnItemClickListener());
+        mPairedDevices.setOnItemClickListener(new OnItemClickListener(this, mPairedDevices));
 
         mAvailableDevices = (ListView) findViewById(R.id.list_available_devices);
         mAvailableDevicesAdapter = new BluetoothDeviceListAdapapter(this, R.layout.bluetooth_device_list_item);
         mAvailableDevices.setAdapter(mAvailableDevicesAdapter);
-        mAvailableDevices.setOnItemClickListener(new OnItemClickListener());
+        mAvailableDevices.setOnItemClickListener(new OnItemClickListener(this, mAvailableDevices));
 
 
         mBtManager.startDiscovery();
@@ -76,13 +75,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class OnItemClickListener implements AdapterView.OnItemClickListener {
+        private Context context;
+        private ListView listView;
+
+        public OnItemClickListener(Context c, ListView listView) {
+            this.context = c;
+            this.listView = listView;
+        }
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            BluetoothDevice btDevice = (BluetoothDevice) mPairedDevices.getItemAtPosition(position);
-            Toast.makeText(mPairedDevices.getContext(), "you selected" + btDevice.getName(), Toast.LENGTH_SHORT).show();
-            mBtManager.connect(btDevice);
+            BluetoothDevice btDevice = (BluetoothDevice) listView.getItemAtPosition(position);
+            mBtManager.cancelDiscovery();
 
+            Intent intent = new Intent(context, ControlActivity.class);
+            intent.putExtra(EXTRA_DEVICE_ADDRESS, btDevice.getAddress());
+
+            startActivity(intent);
         }
     }
 
@@ -132,9 +141,5 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         unregisterReceiver(mReceiver);
         mBtManager.disconnect();
-    }
-
-    public void initControlActivity(BluetoothSocket socket) {
-
     }
 }
