@@ -6,8 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.mikugo.arduinobluetoothshowcase.R;
 
@@ -18,9 +18,11 @@ import java.util.List;
  */
 public class BluetoothDeviceListAdapapter extends ArrayAdapter<BluetoothDevice> {
 
+    private ListView parentListView;
 
     public BluetoothDeviceListAdapapter(Context context, int resource) {
         super(context, resource);
+
     }
 
     public BluetoothDeviceListAdapapter(Context context, int resource, List<BluetoothDevice> devices) {
@@ -37,7 +39,8 @@ public class BluetoothDeviceListAdapapter extends ArrayAdapter<BluetoothDevice> 
         layoutInflater = LayoutInflater.from(getContext());
         view = layoutInflater.inflate(R.layout.bluetooth_device_list_item, null);
         view.setTag(item);
-        view.setOnClickListener(new OnLinkClickListener());
+
+        //view.setOnClickListener(new OnLinkClickListener());
 
         if (item != null) {
             TextView btDeviceName = (TextView) view.findViewById(R.id.text_device_name);
@@ -52,13 +55,4 @@ public class BluetoothDeviceListAdapapter extends ArrayAdapter<BluetoothDevice> 
         return view;
     }
 
-    private class OnLinkClickListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            BluetoothDevice btDevice = (BluetoothDevice) v.getTag();
-
-            Toast.makeText(getContext(), btDevice.getName(), Toast.LENGTH_SHORT);
-        }
-    }
 }

@@ -2,11 +2,16 @@ package com.example.mikugo.arduinobluetoothshowcase;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -14,7 +19,6 @@ import com.example.mikugo.arduinobluetoothshowcase.adapters.BluetoothDeviceListA
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,13 +36,28 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initBluetooth();
+
         mPairedDevices = (ListView) findViewById(R.id.list_paired_devices);
         mPairedDevicesAdapter = new BluetoothDeviceListAdapapter(this, R.layout.bluetooth_device_list_item, getPairedDevices());
         mPairedDevices.setAdapter(mPairedDevicesAdapter);
+        mPairedDevices.setOnItemClickListener(new OnItemClickListener());
 
-        mPairedDevices = (ListView) findViewById(R.id.list_available_devices);
+        mAvailableDevices = (ListView) findViewById(R.id.list_available_devices);
+        mAvailableDevicesAdapter = new BluetoothDeviceListAdapapter(this, R.layout.bluetooth_device_list_item);
+        mAvailableDevices.setAdapter(mAvailableDevicesAdapter);
+        mAvailableDevices.setOnItemClickListener(new OnItemClickListener());
 
+        discoverDevices();
 
+    }
+
+    private class OnItemClickListener implements AdapterView.OnItemClickListener {
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            BluetoothDevice btDevice = (BluetoothDevice) mPairedDevices.getItemAtPosition(position);
+            Toast.makeText(mPairedDevices.getContext(), "you selected" + btDevice.getName(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
@@ -64,10 +83,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
 
         super.onResume();
+        initPairedDevicesList();
 
-        initBluetooth();
-        queryPairedDevices();
+    }
 
+    private void initPairedDevicesList() {
+        List<BluetoothDevice> devices = getPairedDevices();
+        mPairedDevicesAdapter.clear();
+        mPairedDevicesAdapter.addAll(devices);
+        mPairedDevicesAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -88,35 +112,37 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         } else if (id == R.id.action_search_devices) {
-            queryPairedDevices();
+            //queryPairedDevices();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Queries devices which already were paired with that smartphone
-     */
-    private void queryPairedDevices() {
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-        List<String> devices = new ArrayList<>();
-        // If there are paired devices
-        if (pairedDevices.size() > 0) {
-            // Loop through paired devices
-            for (BluetoothDevice device : pairedDevices) {
-                // Add the name and address to an array adapter to show in a ListView
-                devices.add(device.getName() + "\n" + device.getAddress());
-            }
-            System.out.println(devices);
-
-        }
-    }
 
     private List<BluetoothDevice> getPairedDevices() {
-        List list = new ArrayList();
-        list.addAll(mBluetoothAdapter.getBondedDevices());
+        List pairedDevices = new ArrayList();
+        pairedDevices.addAll(mBluetoothAdapter.getBondedDevices());
 
-        return list;
+        return pairedDevices;
+    }
 
+    private void discoverDevices() {
+        mBluetoothAdapter.startDiscovery();
+
+        BroadcastReceiver mReceiver = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                // When discovery finds a device
+                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    // Get the BluetoothDevice object from the Intent
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    // Add the name and address to an array adapter to show in a ListView
+                    mAvailableDevicesAdapter.add(device);
+                }
+            }
+        };
+        // Register the BroadcastReceiver
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
     }
 }

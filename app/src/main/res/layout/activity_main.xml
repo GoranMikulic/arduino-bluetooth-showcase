@@ -1,36 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Paired Devices"
         android:id="@+id/text_paired_devices"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="20dp"/>
-
-    <ListView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/list_paired_devices"
-        android:layout_weight="45"/>
-
-    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Available devices"
-        android:id="@+id/text_available_devices"
         android:layout_marginLeft="20dp"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="20dp"
+        android:text="Paired Devices"
+
+        android:textAppearance="?android:attr/textAppearanceMedium"/>
 
     <ListView
+        android:id="@+id/list_paired_devices"
         android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".4"
+        android:drawSelectorOnTop="true"
+        />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Available Devices"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        />
+
+    <ListView
         android:id="@+id/list_available_devices"
-        android:layout_weight="45"/>
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="top"
+        android:layout_weight=".4"
+        android:drawSelectorOnTop="true"/>
+
 </LinearLayout>
