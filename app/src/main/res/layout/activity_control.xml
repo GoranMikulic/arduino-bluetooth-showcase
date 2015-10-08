@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="40dp"
         android:layout_marginRight="40dp"
-        android:max="100"
+        android:max="255"
         android:id="@+id/seekBar"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"/>

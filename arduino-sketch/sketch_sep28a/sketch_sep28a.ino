@@ -1,7 +1,7 @@
 int ledPin = 9;  // use the built in LED on pin 13 of the Uno
 int state = 0;
 int flag = 0;        // make sure that you return the state only once
-int brightness = 0;
+int brightness = 255;
 
 void setup() {
     // sets the pins as outputs:
@@ -14,9 +14,11 @@ void loop() {
     
     if(Serial.available() > 0){
       state = Serial.read();
+      Serial.println("State:");
       Serial.println(state);
       flag=0;
     }
+
     // if the state is 0 the led will turn off
     if (state == '0') {
         digitalWrite(ledPin, LOW);
@@ -26,18 +28,9 @@ void loop() {
         }
     }
     // if the state is 1 the led will turn on
-    else if (state == '1') {
-        digitalWrite(ledPin, HIGH);
-        analogWrite(ledPin, brightness);
-        if(flag == 0){
-          Serial.println("LED: on");
-          flag = 1;
-        }
-    }
-    else if (state > '1') {
-        //brightness = state;
-        digitalWrite(ledPin, HIGH);
-        //analogWrite(ledPin, brightness);
+    else if (state > '0') {
+        //digitalWrite(ledPin, HIGH);
+        analogWrite(ledPin, state);
         if(flag == 0){
           Serial.println("LED: on");
           flag = 1;

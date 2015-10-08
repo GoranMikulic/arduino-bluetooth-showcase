@@ -13,7 +13,7 @@ import com.example.mikugo.arduinobluetoothshowcase.bluetooth.BluetoothManager;
 
 public class ControlActivity extends AppCompatActivity {
 
-    private static final String LED_STATE_ON = "1";
+    private static final String LED_STATE_ON = "255";
     private static final String LED_STATE_OFF = "0";
 
     private String mDeviceAddress;
@@ -41,7 +41,7 @@ public class ControlActivity extends AppCompatActivity {
 
         mSeekBar = (SeekBar) findViewById(R.id.seekBar);
         mSeekBar.setEnabled(false);
-        mSeekBar.setProgress(100);
+        mSeekBar.setProgress(255);
         mButtonOn = (Button) findViewById(R.id.button_on);
         mButtonOff = (Button) findViewById(R.id.button_off);
         mButtonOff.setEnabled(false);
@@ -69,7 +69,8 @@ public class ControlActivity extends AppCompatActivity {
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                btManager.sendData(String.valueOf(progress));
+                System.out.println(progress);
+                btManager.sendData("100");
             }
 
             @Override
