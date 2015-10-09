@@ -3,6 +3,8 @@ package com.example.mikugo.arduinobluetoothshowcase.bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.Bundle;
+import android.os.Handler;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -13,15 +15,20 @@ import java.util.UUID;
 public class ConnectThread extends Thread {
 
     private static final String DEFAULT_SERIAL_UUID = "00001101-0000-1000-8000-00805f9b34fb";
+    public static final int OBTAIN_SOCKET = 0;
 
     private final BluetoothSocket mmSocket;
     private final BluetoothDevice mmDevice;
     private BluetoothAdapter mBluetoothAdapter;
+    private Handler mConnectedHandler;
 
-    public ConnectThread(BluetoothDevice device, BluetoothAdapter mBluetoothAdapter) {
+    public ConnectThread(BluetoothDevice device, BluetoothAdapter bluetoothAdapter, Handler connectedHandler) {
         // Use a temporary object that is later assigned to mmSocket,
         // because mmSocket is final
         BluetoothSocket tmp = null;
+        mBluetoothAdapter = bluetoothAdapter;
+        mConnectedHandler = connectedHandler;
+
         mmDevice = device;
 
         // Get a BluetoothSocket to connect with the given BluetoothDevice
@@ -29,6 +36,7 @@ public class ConnectThread extends Thread {
             // MY_UUID is the app's UUID string, also used by the server code
             tmp = device.createRfcommSocketToServiceRecord(UUID.fromString(DEFAULT_SERIAL_UUID));
         } catch (IOException e) {
+            e.printStackTrace();
         }
         mmSocket = tmp;
     }
@@ -41,6 +49,11 @@ public class ConnectThread extends Thread {
             // Connect the device through the socket. This will block
             // until it succeeds or throws an exception
             mmSocket.connect();
+
+            Bundle b = new Bundle();
+
+            mConnectedHandler.obtainMessage(OBTAIN_SOCKET, mmSocket).sendToTarget();
+
         } catch (IOException connectException) {
             // Unable to connect; close the socket and get out
             try {
@@ -57,10 +70,15 @@ public class ConnectThread extends Thread {
     /**
      * Will cancel an in-progress connection, and close the socket
      */
-    public void cancel() {
+    public void disconnect() {
         try {
             mmSocket.close();
         } catch (IOException e) {
         }
+    }
+
+
+    public void cancelDiscovery() {
+        mBluetoothAdapter.cancelDiscovery();
     }
 }

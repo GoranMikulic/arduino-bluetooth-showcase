@@ -5,13 +5,14 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by mikugo on 07/10/15.
@@ -25,6 +26,8 @@ public class BluetoothManager {
     private BluetoothAdapter mBluetoothAdapter;
     private Activity activity;
     private ConnectThread mConnectionThread;
+    private ConnectedThread mConnectedThread;
+
     private BluetoothSocket mSocket;
     private OutputStream mOutStream;
 
@@ -66,57 +69,49 @@ public class BluetoothManager {
     }
 
     public void connect(BluetoothDevice btDevice) {
-        //mConnectionThread = new ConnectThread(btDevice, mBluetoothAdapter);
-        //mConnectionThread.run();
-        try {
-            mSocket = btDevice.createRfcommSocketToServiceRecord(UUID.fromString(DEFAULT_SERIAL_UUID));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        // Discovery is resource intensive.  Make sure it isn't going on
-        // when you attempt to connect and pass your message.
-        mBluetoothAdapter.cancelDiscovery();
-
-        // Establish the connection.  This will block until it connects.
-        try {
-            mSocket.connect();
-        } catch (IOException e) {
-            try {
-                mSocket.close();
-            } catch (IOException e2) {
-                //errorExit("Fatal Error", "In onResume() and unable to close socket during connection failure" + e2.getMessage() + ".");
+        final Handler connectedHandler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                if(msg.what == 0){
+                    Toast.makeText(activity, "Data received ", Toast.LENGTH_SHORT).show();
+                }
             }
-        }
+        };
 
-        // Create a data stream so we can talk to server.
-        try {
-            mOutStream = mSocket.getOutputStream();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Handler connectHandler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                if(msg.what == ConnectThread.OBTAIN_SOCKET) {
+                    mSocket = (BluetoothSocket) msg.obj;
+
+                    try {
+                        mOutStream = mSocket.getOutputStream();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    //mConnectedThread = new ConnectedThread(mSocket, connectedHandler);
+                    //mConnectedThread.run();
+                }
+            }
+        };
+
+        mConnectionThread = new ConnectThread(btDevice, mBluetoothAdapter, connectHandler);
+        mConnectionThread.run();
 
 
     }
 
     public void sendData(String message) {
-        byte[] msgBuffer = message.getBytes();
-        try {
-            mOutStream.write(msgBuffer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mConnectedThread.write(message);
     }
 
     public void disconnect() {
-        try {
-            mSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mConnectionThread.disconnect();
     }
 
     public void cancelDiscovery() {
-        mBluetoothAdapter.cancelDiscovery();
+        mConnectionThread.cancelDiscovery();
     }
 }

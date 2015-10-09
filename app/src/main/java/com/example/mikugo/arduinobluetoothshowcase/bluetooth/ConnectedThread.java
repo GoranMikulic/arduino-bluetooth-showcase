@@ -1,6 +1,7 @@
 package com.example.mikugo.arduinobluetoothshowcase.bluetooth;
 
 import android.bluetooth.BluetoothSocket;
+import android.os.Handler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,18 +11,17 @@ import java.io.OutputStream;
  * Created by mikugo on 07/10/15.
  */
 public class ConnectedThread extends Thread {
-    private final BluetoothSocket mmSocket;
     private final InputStream mmInStream;
     private final OutputStream mmOutStream;
+    private Handler mBluetoothIn;
 
-    public ConnectedThread(BluetoothSocket socket) {
-        mmSocket = socket;
+    //creation of the connect thread
+    public ConnectedThread(BluetoothSocket socket, Handler mBluetoothIn) {
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
 
-        // Get the input and output streams, using temp objects because
-        // member streams are final
         try {
+            //Create I/O streams for connection
             tmpIn = socket.getInputStream();
             tmpOut = socket.getOutputStream();
         } catch (IOException e) {
@@ -32,35 +32,30 @@ public class ConnectedThread extends Thread {
     }
 
     public void run() {
-        byte[] buffer = new byte[1024];  // buffer store for the stream
-        int bytes; // bytes returned from read()
+        byte[] buffer = new byte[256];
+        int bytes;
 
-        // Keep listening to the InputStream until an exception occurs
+        // Keep looping to listen for received messages
         while (true) {
             try {
-                // Read from the InputStream
-                bytes = mmInStream.read(buffer);
-                // Send the obtained bytes to the UI activity
-                //mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer).sendToTarget();
+                bytes = mmInStream.read(buffer);            //read bytes from input buffer
+                String readMessage = new String(buffer, 0, bytes);
+                // Send the obtained bytes to the UI Activity via handler
+                mBluetoothIn.obtainMessage(0, bytes, -1, readMessage).sendToTarget();
             } catch (IOException e) {
                 break;
             }
         }
     }
 
-    /* Call this from the main activity to send data to the remote device */
-    public void write(byte[] bytes) {
+    //write method
+    public void write(String input) {
+        byte[] msgBuffer = input.getBytes();           //converts entered String into bytes
         try {
-            mmOutStream.write(bytes);
+            mmOutStream.write(msgBuffer);                //write bytes over BT connection via outstream
         } catch (IOException e) {
-        }
-    }
 
-    /* Call this from the main activity to shutdown the connection */
-    public void cancel() {
-        try {
-            mmSocket.close();
-        } catch (IOException e) {
         }
     }
 }
+

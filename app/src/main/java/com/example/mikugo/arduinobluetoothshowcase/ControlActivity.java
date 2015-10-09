@@ -93,4 +93,5 @@ public class ControlActivity extends AppCompatActivity {
         btManager.sendData("0");
         btManager.disconnect();
     }
+
 }
