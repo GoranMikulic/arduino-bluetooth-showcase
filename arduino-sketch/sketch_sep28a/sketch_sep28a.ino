@@ -11,11 +11,9 @@ void setup() {
 }
 void loop() {
     //if some data is sent, read it and save it in the state variable
-    
+
     if(Serial.available() > 0){
       state = Serial.read();
-      Serial.println("State:");
-      Serial.println(state);
       flag=0;
     }
 
@@ -23,7 +21,7 @@ void loop() {
     if (state == '0') {
         digitalWrite(ledPin, LOW);
         if(flag == 0){
-          Serial.println("LED: off");
+          Serial.write("OFF");
           flag = 1;
         }
     }
@@ -32,7 +30,7 @@ void loop() {
         //digitalWrite(ledPin, HIGH);
         analogWrite(ledPin, state);
         if(flag == 0){
-          Serial.println("LED: on");
+          Serial.println("ON");
           flag = 1;
         }
     }

@@ -11,7 +11,7 @@ import android.widget.SeekBar;
 
 import com.example.mikugo.arduinobluetoothshowcase.bluetooth.BluetoothHelper;
 
-public class ControlActivity extends AppCompatActivity {
+public class ControlActivity extends AppCompatActivity implements DeviceConnectedListener {
 
     private static final String LED_STATE_ON = "255";
     private static final String LED_STATE_OFF = "0";
@@ -36,13 +36,14 @@ public class ControlActivity extends AppCompatActivity {
         Intent intent = getIntent();
         mDeviceAddress = intent.getStringExtra(MainActivity.EXTRA_DEVICE_ADDRESS);
         mDevice = btAdapter.getRemoteDevice(mDeviceAddress);
-        btManager = new BluetoothHelper(this);
+        btManager = new BluetoothHelper(this, this);
         btManager.connect(mDevice);
 
         mSeekBar = (SeekBar) findViewById(R.id.seekBar);
         mSeekBar.setEnabled(false);
         mSeekBar.setProgress(255);
         mButtonOn = (Button) findViewById(R.id.button_on);
+        mButtonOn.setEnabled(false);
         mButtonOff = (Button) findViewById(R.id.button_off);
         mButtonOff.setEnabled(false);
 
@@ -94,4 +95,8 @@ public class ControlActivity extends AppCompatActivity {
         btManager.disconnect();
     }
 
+    @Override
+    public void connected() {
+        mButtonOn.setEnabled(true);
+    }
 }

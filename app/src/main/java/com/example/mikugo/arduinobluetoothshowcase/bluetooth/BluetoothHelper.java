@@ -9,6 +9,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
+import com.example.mikugo.arduinobluetoothshowcase.DeviceConnectedListener;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -25,13 +27,21 @@ public class BluetoothHelper {
     private Activity activity;
     private ConnectThread mConnectionThread;
     private ConnectedThread mConnectedThread;
+    private DeviceConnectedListener mdeviceConnectedListener;
 
     private BluetoothSocket mSocket;
     private OutputStream mOutStream;
 
-    public BluetoothHelper(Activity activity) {
+    public BluetoothHelper(Activity activity, DeviceConnectedListener deviceConnectedListener) {
+
+        //TODO remove this.
         this.activity = activity;
         this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mdeviceConnectedListener = deviceConnectedListener;
+    }
+
+    public BluetoothHelper(Activity activity) {
+        this(activity, null);
     }
 
     /**
@@ -71,7 +81,7 @@ public class BluetoothHelper {
             public void handleMessage(Message msg) {
                 if (msg.what == 0) {
 
-                    Toast.makeText(activity, "Data received ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, (String) msg.obj, Toast.LENGTH_SHORT).show();
                 }
             }
         };
@@ -90,6 +100,7 @@ public class BluetoothHelper {
 
                     mConnectedThread = new ConnectedThread(mSocket, connectedHandler);
                     mConnectedThread.start();
+                    mdeviceConnectedListener.connected();
                 }
             }
         };
