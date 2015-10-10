@@ -1,11 +1,15 @@
 package com.example.mikugo.arduinobluetoothshowcase;
 
+import android.Manifest;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -14,16 +18,15 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.mikugo.arduinobluetoothshowcase.adapters.BluetoothDeviceListAdapapter;
-import com.example.mikugo.arduinobluetoothshowcase.bluetooth.BluetoothManager;
+import com.example.mikugo.arduinobluetoothshowcase.bluetooth.BluetoothHelper;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int REQUEST_ENABLE_BT = 1;
     public static final String EXTRA_DEVICE_ADDRESS = "device_address";
 
-    private BluetoothManager mBtManager;
+    private BluetoothHelper mBtHelper;
 
     private ListView mPairedDevices;
     private BluetoothDeviceListAdapapter mPairedDevicesAdapter;
@@ -37,11 +40,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mBtManager = new BluetoothManager(this);
-        mBtManager.initBluetooth();
+        mBtHelper = new BluetoothHelper(this);
+        mBtHelper.initBluetooth();
 
         mPairedDevices = (ListView) findViewById(R.id.list_paired_devices);
-        mPairedDevicesAdapter = new BluetoothDeviceListAdapapter(this, R.layout.bluetooth_device_list_item, mBtManager.getPairedDevices());
+        mPairedDevicesAdapter = new BluetoothDeviceListAdapapter(this, R.layout.bluetooth_device_list_item, mBtHelper.getPairedDevices());
         mPairedDevices.setAdapter(mPairedDevicesAdapter);
         mPairedDevices.setOnItemClickListener(new OnItemClickListener(this, mPairedDevices));
 
@@ -50,8 +53,14 @@ public class MainActivity extends AppCompatActivity {
         mAvailableDevices.setAdapter(mAvailableDevicesAdapter);
         mAvailableDevices.setOnItemClickListener(new OnItemClickListener(this, mAvailableDevices));
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 10);
+            }
+        }
 
-        mBtManager.startDiscovery();
+        mBtHelper.startDiscovery();
 
         mReceiver = new BroadcastReceiver() {
             @Override
@@ -70,8 +79,24 @@ public class MainActivity extends AppCompatActivity {
 
         // Register the BroadcastReceiver
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+
         registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
 
+    }
+
+    /**
+     * Devices doesn't get explored if bluetooth is not active before launch, discovery doesn't get started properly in onCreate() because
+     * bluetooth is not activated. Activity receives result with requestCode BluetoothHelper.REQUEST_ENABLE_BT after user accepted bluetooth
+     * activation.
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (BluetoothHelper.REQUEST_ENABLE_BT == requestCode) {
+            mBtHelper.initBluetooth();
+            mBtHelper.startDiscovery();
+        }
     }
 
     private class OnItemClickListener implements AdapterView.OnItemClickListener {
@@ -86,13 +111,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             BluetoothDevice btDevice = (BluetoothDevice) listView.getItemAtPosition(position);
-            mBtManager.cancelDiscovery();
+            mBtHelper.cancelDiscovery();
 
             Intent intent = new Intent(context, ControlActivity.class);
             intent.putExtra(EXTRA_DEVICE_ADDRESS, btDevice.getAddress());
 
             startActivity(intent);
         }
+
     }
 
 
@@ -105,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initPairedDevicesList() {
-        List<BluetoothDevice> devices = mBtManager.getPairedDevices();
+        List<BluetoothDevice> devices = mBtHelper.getPairedDevices();
         mPairedDevicesAdapter.clear();
         mPairedDevicesAdapter.addAll(devices);
         mPairedDevicesAdapter.notifyDataSetChanged();
@@ -140,6 +166,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mReceiver);
-        mBtManager.disconnect();
+        mBtHelper.disconnect();
     }
 }

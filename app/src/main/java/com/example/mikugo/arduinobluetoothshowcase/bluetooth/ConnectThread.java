@@ -79,6 +79,8 @@ public class ConnectThread extends Thread {
 
 
     public void cancelDiscovery() {
-        mBluetoothAdapter.cancelDiscovery();
+        if (mBluetoothAdapter.isDiscovering()) {
+            mBluetoothAdapter.cancelDiscovery();
+        }
     }
 }

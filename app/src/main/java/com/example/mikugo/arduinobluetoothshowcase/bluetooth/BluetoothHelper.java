@@ -17,11 +17,9 @@ import java.util.List;
 /**
  * Created by mikugo on 07/10/15.
  */
-public class BluetoothManager {
+public class BluetoothHelper {
 
-    private static final int REQUEST_ENABLE_BT = 1;
-    private static final String DEFAULT_SERIAL_UUID = "00001101-0000-1000-8000-00805f9b34fb";
-
+    public static final int REQUEST_ENABLE_BT = 1;
 
     private BluetoothAdapter mBluetoothAdapter;
     private Activity activity;
@@ -31,7 +29,7 @@ public class BluetoothManager {
     private BluetoothSocket mSocket;
     private OutputStream mOutStream;
 
-    public BluetoothManager(Activity activity){
+    public BluetoothHelper(Activity activity) {
         this.activity = activity;
         this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
@@ -55,8 +53,6 @@ public class BluetoothManager {
 
     }
 
-
-
     public List<BluetoothDevice> getPairedDevices() {
         List pairedDevices = new ArrayList();
         pairedDevices.addAll(mBluetoothAdapter.getBondedDevices());
@@ -70,19 +66,20 @@ public class BluetoothManager {
 
     public void connect(BluetoothDevice btDevice) {
 
-        final Handler connectedHandler = new Handler(){
+        final Handler connectedHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                if(msg.what == 0){
+                if (msg.what == 0) {
+
                     Toast.makeText(activity, "Data received ", Toast.LENGTH_SHORT).show();
                 }
             }
         };
 
-        Handler connectHandler = new Handler(){
+        Handler connectHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                if(msg.what == ConnectThread.OBTAIN_SOCKET) {
+                if (msg.what == ConnectThread.OBTAIN_SOCKET) {
                     mSocket = (BluetoothSocket) msg.obj;
 
                     try {
@@ -91,14 +88,14 @@ public class BluetoothManager {
                         e.printStackTrace();
                     }
 
-                    //mConnectedThread = new ConnectedThread(mSocket, connectedHandler);
-                    //mConnectedThread.run();
+                    mConnectedThread = new ConnectedThread(mSocket, connectedHandler);
+                    mConnectedThread.start();
                 }
             }
         };
 
         mConnectionThread = new ConnectThread(btDevice, mBluetoothAdapter, connectHandler);
-        mConnectionThread.run();
+        mConnectionThread.start();
 
 
     }
@@ -112,6 +109,8 @@ public class BluetoothManager {
     }
 
     public void cancelDiscovery() {
-        mConnectionThread.cancelDiscovery();
+        if (mBluetoothAdapter.isDiscovering()) {
+            mBluetoothAdapter.cancelDiscovery();
+        }
     }
 }

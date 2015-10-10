@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 
-import com.example.mikugo.arduinobluetoothshowcase.bluetooth.BluetoothManager;
+import com.example.mikugo.arduinobluetoothshowcase.bluetooth.BluetoothHelper;
 
 public class ControlActivity extends AppCompatActivity {
 
@@ -18,7 +18,7 @@ public class ControlActivity extends AppCompatActivity {
 
     private String mDeviceAddress;
 
-    private BluetoothManager btManager;
+    private BluetoothHelper btManager;
     private BluetoothAdapter btAdapter;
     private BluetoothDevice mDevice;
 
@@ -36,7 +36,7 @@ public class ControlActivity extends AppCompatActivity {
         Intent intent = getIntent();
         mDeviceAddress = intent.getStringExtra(MainActivity.EXTRA_DEVICE_ADDRESS);
         mDevice = btAdapter.getRemoteDevice(mDeviceAddress);
-        btManager = new BluetoothManager(this);
+        btManager = new BluetoothHelper(this);
         btManager.connect(mDevice);
 
         mSeekBar = (SeekBar) findViewById(R.id.seekBar);

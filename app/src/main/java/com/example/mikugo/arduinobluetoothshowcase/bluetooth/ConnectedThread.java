@@ -16,9 +16,10 @@ public class ConnectedThread extends Thread {
     private Handler mBluetoothIn;
 
     //creation of the connect thread
-    public ConnectedThread(BluetoothSocket socket, Handler mBluetoothIn) {
+    public ConnectedThread(BluetoothSocket socket, Handler bluetoothIn) {
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
+        mBluetoothIn = bluetoothIn;
 
         try {
             //Create I/O streams for connection
@@ -50,9 +51,9 @@ public class ConnectedThread extends Thread {
 
     //write method
     public void write(String input) {
-        byte[] msgBuffer = input.getBytes();           //converts entered String into bytes
+        byte[] msgBuffer = input.getBytes(); //converts entered String into bytes
         try {
-            mmOutStream.write(msgBuffer);                //write bytes over BT connection via outstream
+            mmOutStream.write(msgBuffer); //write bytes over BT connection via outstream
         } catch (IOException e) {
 
         }
