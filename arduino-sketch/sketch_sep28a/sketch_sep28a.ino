@@ -21,7 +21,7 @@ void loop() {
     if (state == '0') {
         digitalWrite(ledPin, LOW);
         if(flag == 0){
-          Serial.write("OFF");
+          Serial.println("OFF");
           flag = 1;
         }
     }

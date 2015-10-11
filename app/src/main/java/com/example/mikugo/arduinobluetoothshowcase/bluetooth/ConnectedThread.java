@@ -33,16 +33,34 @@ public class ConnectedThread extends Thread {
     }
 
     public void run() {
-        byte[] buffer = new byte[256];
-        int bytes;
+        byte delimiter = 10;
+        int readBufferPosition = 0;
+        byte[] readBuffer = new byte[1024];
 
         // Keep looping to listen for received messages
         while (true) {
             try {
-                bytes = mmInStream.read(buffer);            //read bytes from input buffer
-                String readMessage = new String(buffer, 0, bytes);
-                // Send the obtained bytes to the UI Activity via handler
-                mBluetoothIn.obtainMessage(0, bytes, -1, readMessage).sendToTarget();
+                int bytesAvailable = mmInStream.available();
+                if (bytesAvailable > 0) {
+
+                    byte[] packetBytes = new byte[bytesAvailable];
+
+                    mmInStream.read(packetBytes);
+                    for (int i = 0; i < bytesAvailable; i++) {
+                        byte b = packetBytes[i];
+                        if (b == delimiter) {
+                            byte[] encodedBytes = new byte[readBufferPosition];
+                            System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
+                            final String data = new String(encodedBytes, "US-ASCII");
+                            readBufferPosition = 0;
+
+                            mBluetoothIn.obtainMessage(0, b, -1, data).sendToTarget();
+
+                        } else {
+                            readBuffer[readBufferPosition++] = b;
+                        }
+                    }
+                }
             } catch (IOException e) {
                 break;
             }

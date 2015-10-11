@@ -6,5 +6,6 @@ package com.example.mikugo.arduinobluetoothshowcase;
 public interface DeviceConnectedListener {
 
     void connected();
+    void messageReceived(String message);
 
 }

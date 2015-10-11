@@ -81,7 +81,11 @@ public class BluetoothHelper {
             public void handleMessage(Message msg) {
                 if (msg.what == 0) {
 
-                    Toast.makeText(activity, (String) msg.obj, Toast.LENGTH_SHORT).show();
+                    if (mdeviceConnectedListener != null) {
+                        mdeviceConnectedListener.messageReceived((String) msg.obj);
+                    } else {
+                        Toast.makeText(activity, (String) msg.obj, Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         };
@@ -100,7 +104,10 @@ public class BluetoothHelper {
 
                     mConnectedThread = new ConnectedThread(mSocket, connectedHandler);
                     mConnectedThread.start();
-                    mdeviceConnectedListener.connected();
+
+                    if (mdeviceConnectedListener != null) {
+                        mdeviceConnectedListener.connected();
+                    }
                 }
             }
         };

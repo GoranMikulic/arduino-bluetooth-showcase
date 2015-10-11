@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.example.mikugo.arduinobluetoothshowcase.bluetooth.BluetoothHelper;
 
@@ -25,6 +26,7 @@ public class ControlActivity extends AppCompatActivity implements DeviceConnecte
     private Button mButtonOn;
     private Button mButtonOff;
     private SeekBar mSeekBar;
+    private TextView mReceivedMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +48,8 @@ public class ControlActivity extends AppCompatActivity implements DeviceConnecte
         mButtonOn.setEnabled(false);
         mButtonOff = (Button) findViewById(R.id.button_off);
         mButtonOff.setEnabled(false);
+
+        mReceivedMessage = (TextView) findViewById(R.id.data_from_arduino);
 
         mButtonOn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,8 +88,6 @@ public class ControlActivity extends AppCompatActivity implements DeviceConnecte
 
             }
         });
-        
-        //btManager.sendData("1");
     }
 
     @Override
@@ -98,5 +100,10 @@ public class ControlActivity extends AppCompatActivity implements DeviceConnecte
     @Override
     public void connected() {
         mButtonOn.setEnabled(true);
+    }
+
+    @Override
+    public void messageReceived(String message) {
+        mReceivedMessage.setText(message);
     }
 }
