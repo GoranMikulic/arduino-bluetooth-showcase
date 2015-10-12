@@ -1,7 +1,7 @@
 package com.example.mikugo.arduinobluetoothshowcase.bluetooth;
 
 /**
- * Created by mikugo on 10/10/15.
+ * Interface for bluetooth actions
  */
 public interface BluetoothActionListener {
 

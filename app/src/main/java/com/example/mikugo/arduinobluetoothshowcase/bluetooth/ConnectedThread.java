@@ -8,14 +8,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Created by mikugo on 07/10/15.
+ * Thread running when connection is established. Provides input and output stream for sending and receiving data.
  */
 public class ConnectedThread extends Thread {
-    private final InputStream mmInStream;
-    private final OutputStream mmOutStream;
+    private final InputStream mInStream;
+    private final OutputStream mOutStream;
     private Handler mBluetoothIn;
 
-    //creation of the connect thread
+
     public ConnectedThread(BluetoothSocket socket, Handler bluetoothIn) {
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
@@ -28,8 +28,8 @@ public class ConnectedThread extends Thread {
         } catch (IOException e) {
         }
 
-        mmInStream = tmpIn;
-        mmOutStream = tmpOut;
+        mInStream = tmpIn;
+        mOutStream = tmpOut;
     }
 
     public void run() {
@@ -40,12 +40,12 @@ public class ConnectedThread extends Thread {
         // Keep looping to listen for received messages
         while (true) {
             try {
-                int bytesAvailable = mmInStream.available();
+                int bytesAvailable = mInStream.available();
                 if (bytesAvailable > 0) {
 
                     byte[] packetBytes = new byte[bytesAvailable];
 
-                    mmInStream.read(packetBytes);
+                    mInStream.read(packetBytes);
                     for (int i = 0; i < bytesAvailable; i++) {
                         byte b = packetBytes[i];
                         if (b == delimiter) {
@@ -67,13 +67,16 @@ public class ConnectedThread extends Thread {
         }
     }
 
-    //write method
+    /**
+     * Sending message to arduino
+     *
+     * @param input - Message to send
+     */
     public void write(String input) {
         String msg = input + "\n";
-        byte[] msgBuffer = input.getBytes(); //converts entered String into bytes
 
         try {
-            mmOutStream.write(msg.getBytes()); //write bytes over BT connection via outstream
+            mOutStream.write(msg.getBytes()); //write bytes over BT connection via outstream
         } catch (IOException e) {
             e.printStackTrace();
         }

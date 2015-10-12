@@ -9,8 +9,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +26,6 @@ public class BluetoothHelper {
     private BluetoothActionListener mdeviceConnectedListener;
 
     private BluetoothSocket mSocket;
-    private OutputStream mOutStream;
 
     public BluetoothHelper(Activity activity, BluetoothActionListener bluetoothActionListener) {
 
@@ -94,12 +91,6 @@ public class BluetoothHelper {
                 if (msg.what == ConnectThread.OBTAIN_SOCKET) {
                     mSocket = (BluetoothSocket) msg.obj;
 
-                    try {
-                        mOutStream = mSocket.getOutputStream();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
                     mConnectedThread = new ConnectedThread(mSocket, connectedHandler);
                     mConnectedThread.start();
 
@@ -112,8 +103,6 @@ public class BluetoothHelper {
 
         mConnectionThread = new ConnectThread(btDevice, mBluetoothAdapter, connectHandler);
         mConnectionThread.start();
-
-
     }
 
     public void sendData(String message) {

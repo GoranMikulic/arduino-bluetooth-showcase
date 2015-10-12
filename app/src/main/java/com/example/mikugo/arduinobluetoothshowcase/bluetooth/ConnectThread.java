@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 /**
- * Created by mikugo on 07/10/15.
+ * Thread for connecting a bluetooth device.
  */
 public class ConnectThread extends Thread {
 
@@ -62,9 +62,6 @@ public class ConnectThread extends Thread {
             }
             return;
         }
-
-        // Do work to manage the connection (in a separate thread)
-        //manageConnectedSocket(mmSocket);
     }
 
     /**
@@ -74,13 +71,6 @@ public class ConnectThread extends Thread {
         try {
             mmSocket.close();
         } catch (IOException e) {
-        }
-    }
-
-
-    public void cancelDiscovery() {
-        if (mBluetoothAdapter.isDiscovering()) {
-            mBluetoothAdapter.cancelDiscovery();
         }
     }
 }

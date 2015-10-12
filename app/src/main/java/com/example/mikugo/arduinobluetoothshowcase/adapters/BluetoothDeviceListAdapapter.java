@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.mikugo.arduinobluetoothshowcase.R;
@@ -14,11 +13,9 @@ import com.example.mikugo.arduinobluetoothshowcase.R;
 import java.util.List;
 
 /**
- * Created by mikugo on 30/09/15.
+ * List adapter representing bluetooth devices in list view
  */
 public class BluetoothDeviceListAdapapter extends ArrayAdapter<BluetoothDevice> {
-
-    private ListView parentListView;
 
     public BluetoothDeviceListAdapapter(Context context, int resource) {
         super(context, resource);
@@ -32,15 +29,11 @@ public class BluetoothDeviceListAdapapter extends ArrayAdapter<BluetoothDevice> 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        View view = convertView;
-
         BluetoothDevice item = getItem(position);
         LayoutInflater layoutInflater;
         layoutInflater = LayoutInflater.from(getContext());
-        view = layoutInflater.inflate(R.layout.bluetooth_device_list_item, null);
+        View view = layoutInflater.inflate(R.layout.bluetooth_device_list_item, null);
         view.setTag(item);
-
-        //view.setOnClickListener(new OnLinkClickListener());
 
         if (item != null) {
             TextView btDeviceName = (TextView) view.findViewById(R.id.text_device_name);

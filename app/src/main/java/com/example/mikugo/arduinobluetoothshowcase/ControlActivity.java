@@ -15,7 +15,6 @@ import com.example.mikugo.arduinobluetoothshowcase.bluetooth.BluetoothHelper;
 
 public class ControlActivity extends AppCompatActivity {
 
-    //private static final String LED_STATE_ON = "255";
     private static final String LED_STATE_OFF = "300";
     private static final int SEEK_BAR_MAX_PROGRESS = 255;
 
