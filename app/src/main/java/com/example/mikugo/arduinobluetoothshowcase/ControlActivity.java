@@ -15,8 +15,8 @@ import com.example.mikugo.arduinobluetoothshowcase.bluetooth.BluetoothHelper;
 
 public class ControlActivity extends AppCompatActivity {
 
-    private static final String LED_STATE_ON = "255";
-    private static final String LED_STATE_OFF = "0";
+    //private static final String LED_STATE_ON = "255";
+    private static final String LED_STATE_OFF = "300";
     private static final int SEEK_BAR_MAX_PROGRESS = 255;
 
     private String mDeviceAddress;
@@ -56,7 +56,7 @@ public class ControlActivity extends AppCompatActivity {
         mButtonOn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                btManager.sendData(LED_STATE_ON);
+                btManager.sendData(String.valueOf(mSeekBar.getProgress()));
                 mButtonOff.setEnabled(true);
                 mButtonOn.setEnabled(false);
                 mSeekBar.setEnabled(true);
@@ -76,7 +76,7 @@ public class ControlActivity extends AppCompatActivity {
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
+                btManager.sendData(String.valueOf(seekBar.getProgress()));
             }
 
             @Override
@@ -86,7 +86,7 @@ public class ControlActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                btManager.sendData(String.valueOf(seekBar.getProgress()));
+
             }
         });
     }
