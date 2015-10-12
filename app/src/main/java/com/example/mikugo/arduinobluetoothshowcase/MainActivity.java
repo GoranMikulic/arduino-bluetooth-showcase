@@ -175,6 +175,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mReceiver);
-        mBtHelper.disconnect();
     }
 }

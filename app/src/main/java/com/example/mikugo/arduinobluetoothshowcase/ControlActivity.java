@@ -94,7 +94,7 @@ public class ControlActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        btManager.sendData("0");
+        btManager.sendData(LED_STATE_OFF);
         btManager.disconnect();
     }
 
