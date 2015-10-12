@@ -1,17 +1,14 @@
-int ledPin = 9;  // use the built in LED on pin 13 of the Uno
+int ledPin = 9;  // analogWrite() works at pin 9
 int state = 0;
-int flag = 0;        // make sure that you return the state only once
-int brightness = 255;
+int flag = 0; // return state only once
 
 void setup() {
-    // sets the pins as outputs:
     pinMode(ledPin, OUTPUT);
     digitalWrite(ledPin, LOW);
-    Serial.begin(9600); // Default connection rate for my BT module
+    Serial.begin(9600); // Default connection rate for the bluetooth module
 }
 void loop() {
     //if some data is sent, read it and save it in the state variable
-
     if(Serial.available() > 0){
       state = Serial.read();
       flag=0;
@@ -22,6 +19,7 @@ void loop() {
         digitalWrite(ledPin, LOW);
         if(flag == 0){
           Serial.println("OFF");
+          Serial.println(state);
           flag = 1;
         }
     }
@@ -31,6 +29,7 @@ void loop() {
         analogWrite(ledPin, state);
         if(flag == 0){
           Serial.println("ON");
+          Serial.println(state);
           flag = 1;
         }
     }

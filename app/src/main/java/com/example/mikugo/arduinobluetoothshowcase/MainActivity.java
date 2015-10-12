@@ -22,6 +22,9 @@ import com.example.mikugo.arduinobluetoothshowcase.bluetooth.BluetoothHelper;
 
 import java.util.List;
 
+/**
+ * Main Activity - responsible for displaying available and paired devices. Starts discovering bluetooth devices on startup.
+ */
 public class MainActivity extends AppCompatActivity {
 
     public static final String EXTRA_DEVICE_ADDRESS = "device_address";
@@ -53,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
         mAvailableDevices.setAdapter(mAvailableDevicesAdapter);
         mAvailableDevices.setOnItemClickListener(new OnItemClickListener(this, mAvailableDevices));
 
+        //checking Manifest.permission.ACCESS_FINE_LOCATION because of changes in Android API 23, discovering devices requires permissions during
+        // runtime
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
             } else {
@@ -62,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
         mBtHelper.startDiscovery();
 
+        //receiver handles broadcast if a bluetooth device is found, adds device to the list
         mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -79,7 +85,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Register the BroadcastReceiver
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-
         registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
 
     }
@@ -99,6 +104,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Starting intent for ControlActivity when user selects a device
+     */
     private class OnItemClickListener implements AdapterView.OnItemClickListener {
         private Context context;
         private ListView listView;
@@ -130,6 +138,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Setting data for the list of paired devices
+     */
     private void initPairedDevicesList() {
         List<BluetoothDevice> devices = mBtHelper.getPairedDevices();
         mPairedDevicesAdapter.clear();
@@ -154,8 +165,6 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
-        } else if (id == R.id.action_search_devices) {
-            //queryPairedDevices();
         }
 
         return super.onOptionsItemSelected(item);
