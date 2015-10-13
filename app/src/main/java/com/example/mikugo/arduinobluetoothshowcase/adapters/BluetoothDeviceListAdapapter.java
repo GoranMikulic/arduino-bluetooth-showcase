@@ -19,7 +19,6 @@ public class BluetoothDeviceListAdapapter extends ArrayAdapter<BluetoothDevice> 
 
     public BluetoothDeviceListAdapapter(Context context, int resource) {
         super(context, resource);
-
     }
 
     public BluetoothDeviceListAdapapter(Context context, int resource, List<BluetoothDevice> devices) {

@@ -12,8 +12,11 @@
 
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:layout_marginRight="40dp"
         android:text="@string/on"
         android:id="@+id/button_on"
         android:layout_marginBottom="52dp"
@@ -22,8 +25,12 @@
         android:layout_alignStart="@+id/button_off"/>
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
         android:text="@string/off"
         android:id="@+id/button_off"
         android:layout_marginTop="129dp"

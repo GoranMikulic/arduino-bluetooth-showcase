@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -22,6 +25,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     public static final String EXTRA_DEVICE_ADDRESS = "device_address";
+    public static final String EXTRA_DEVICE_NAME = "device_name";
 
     private BluetoothHelper mBtHelper;
 
@@ -107,11 +111,20 @@ public class MainActivity extends AppCompatActivity {
             mBtHelper.cancelDiscovery();
 
             Intent intent = new Intent(context, ControlActivity.class);
+            intent.putExtra(EXTRA_DEVICE_NAME, btDevice.getName());
             intent.putExtra(EXTRA_DEVICE_ADDRESS, btDevice.getAddress());
 
             startActivity(intent);
         }
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.activity_main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -134,5 +147,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(mReceiver);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_search:
+                restartDiscovery();
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void restartDiscovery() {
+        mAvailableDevicesAdapter.clear();
+        mBtHelper.stopDiscovery();
+        mBtHelper.startDiscovery();
     }
 }

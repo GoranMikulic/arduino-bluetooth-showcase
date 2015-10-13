@@ -19,6 +19,7 @@ public class ControlActivity extends AppCompatActivity {
     private static final int SEEK_BAR_MAX_PROGRESS = 255;
 
     private String mDeviceAddress;
+    private String mDeviceName;
 
     private BluetoothHelper btManager;
     private BluetoothAdapter btAdapter;
@@ -38,6 +39,9 @@ public class ControlActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         mDeviceAddress = intent.getStringExtra(MainActivity.EXTRA_DEVICE_ADDRESS);
+        mDeviceName = intent.getStringExtra(MainActivity.EXTRA_DEVICE_NAME);
+        setTitle(mDeviceName);
+
         mDevice = btAdapter.getRemoteDevice(mDeviceAddress);
         btManager = new BluetoothHelper(this, new ControlBluetoothActionListener());
         btManager.connect(mDevice);

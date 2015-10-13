@@ -1,9 +1,7 @@
 package com.example.mikugo.arduinobluetoothshowcase.bluetooth;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.os.Bundle;
 import android.os.Handler;
 
 import java.io.IOException;
@@ -17,19 +15,14 @@ public class ConnectThread extends Thread {
     private static final String DEFAULT_SERIAL_UUID = "00001101-0000-1000-8000-00805f9b34fb";
     public static final int OBTAIN_SOCKET = 0;
 
-    private final BluetoothSocket mmSocket;
-    private final BluetoothDevice mmDevice;
-    private BluetoothAdapter mBluetoothAdapter;
+    private final BluetoothSocket mSocket;
     private Handler mConnectedHandler;
 
-    public ConnectThread(BluetoothDevice device, BluetoothAdapter bluetoothAdapter, Handler connectedHandler) {
-        // Use a temporary object that is later assigned to mmSocket,
-        // because mmSocket is final
+    public ConnectThread(BluetoothDevice device, Handler connectedHandler) {
+        // Use a temporary object that is later assigned to mSocket,
+        // because mSocket is final
         BluetoothSocket tmp = null;
-        mBluetoothAdapter = bluetoothAdapter;
         mConnectedHandler = connectedHandler;
-
-        mmDevice = device;
 
         // Get a BluetoothSocket to connect with the given BluetoothDevice
         try {
@@ -38,7 +31,7 @@ public class ConnectThread extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mmSocket = tmp;
+        mSocket = tmp;
     }
 
     public void run() {
@@ -48,16 +41,13 @@ public class ConnectThread extends Thread {
         try {
             // Connect the device through the socket. This will block
             // until it succeeds or throws an exception
-            mmSocket.connect();
-
-            Bundle b = new Bundle();
-
-            mConnectedHandler.obtainMessage(OBTAIN_SOCKET, mmSocket).sendToTarget();
+            mSocket.connect();
+            mConnectedHandler.obtainMessage(OBTAIN_SOCKET, mSocket).sendToTarget();
 
         } catch (IOException connectException) {
             // Unable to connect; close the socket and get out
             try {
-                mmSocket.close();
+                mSocket.close();
             } catch (IOException closeException) {
             }
             return;
@@ -69,7 +59,7 @@ public class ConnectThread extends Thread {
      */
     public void disconnect() {
         try {
-            mmSocket.close();
+            mSocket.close();
         } catch (IOException e) {
         }
     }

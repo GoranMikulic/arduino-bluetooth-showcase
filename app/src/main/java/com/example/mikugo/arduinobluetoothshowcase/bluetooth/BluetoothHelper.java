@@ -1,12 +1,16 @@
 package com.example.mikugo.arduinobluetoothshowcase.bluetooth;
 
+import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -20,7 +24,7 @@ public class BluetoothHelper {
     public static final int REQUEST_ENABLE_BT = 1;
 
     private BluetoothAdapter mBluetoothAdapter;
-    private Activity activity;
+    private Activity mActivity;
     private ConnectThread mConnectionThread;
     private ConnectedThread mConnectedThread;
     private BluetoothActionListener mdeviceConnectedListener;
@@ -28,10 +32,8 @@ public class BluetoothHelper {
     private BluetoothSocket mSocket;
 
     public BluetoothHelper(Activity activity, BluetoothActionListener bluetoothActionListener) {
-
-        //TODO remove this.
-        this.activity = activity;
-        this.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mActivity = activity;
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mdeviceConnectedListener = bluetoothActionListener;
     }
 
@@ -48,12 +50,19 @@ public class BluetoothHelper {
 
         if (mBluetoothAdapter == null) {
             // Device does not support Bluetooth
-            Toast.makeText(activity, "Device does not support Bluetooth", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mActivity, "Device does not support Bluetooth", Toast.LENGTH_SHORT).show();
         }
 
         if (!mBluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            mActivity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+
+        if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(mActivity, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            } else {
+                ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 10);
+            }
         }
 
     }
@@ -69,6 +78,10 @@ public class BluetoothHelper {
         mBluetoothAdapter.startDiscovery();
     }
 
+    public void stopDiscovery() {
+        mBluetoothAdapter.cancelDiscovery();
+    }
+
     public void connect(BluetoothDevice btDevice) {
 
         final Handler connectedHandler = new Handler() {
@@ -79,7 +92,7 @@ public class BluetoothHelper {
                     if (mdeviceConnectedListener != null) {
                         mdeviceConnectedListener.messageReceived((String) msg.obj);
                     } else {
-                        Toast.makeText(activity, (String) msg.obj, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mActivity, (String) msg.obj, Toast.LENGTH_SHORT).show();
                     }
                 }
             }
@@ -101,7 +114,7 @@ public class BluetoothHelper {
             }
         };
 
-        mConnectionThread = new ConnectThread(btDevice, mBluetoothAdapter, connectHandler);
+        mConnectionThread = new ConnectThread(btDevice, connectHandler);
         mConnectionThread.start();
     }
 
