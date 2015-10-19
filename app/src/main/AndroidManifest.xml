@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    <!-- Important since API Level 23 - Android Marshmallow! -->
+    <!-- Important since API Level 23 - Android 6.0 (Marshmallow) -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application

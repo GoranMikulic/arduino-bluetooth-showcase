@@ -60,6 +60,10 @@ public class BluetoothHelper {
 
         if (ContextCompat.checkSelfPermission(mActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(mActivity, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                 // Gets whether you should show UI with rationale for requesting a permission.
+                 // You should do this only if you do not have the permission and the context in
+                 //which the permission is requested does not clearly communicate to the user
+                 // what would be the benefit from granting this permission.
             } else {
                 ActivityCompat.requestPermissions(mActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 10);
             }
@@ -82,6 +86,11 @@ public class BluetoothHelper {
         mBluetoothAdapter.cancelDiscovery();
     }
 
+    /**
+     * Establishing connection to a BluetoothDevice, running asynchronously in a thread.
+     *
+     * @param btDevice - BluetoothDevice to connect
+     */
     public void connect(BluetoothDevice btDevice) {
 
         final Handler connectedHandler = new Handler() {

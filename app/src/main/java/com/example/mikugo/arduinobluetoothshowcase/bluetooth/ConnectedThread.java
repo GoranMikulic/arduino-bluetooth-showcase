@@ -76,7 +76,8 @@ public class ConnectedThread extends Thread {
         String msg = input + "\n";
 
         try {
-            mOutStream.write(msg.getBytes()); //write bytes over BT connection via outstream
+            //write bytes over BT connection via outstream
+            mOutStream.write(msg.getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }

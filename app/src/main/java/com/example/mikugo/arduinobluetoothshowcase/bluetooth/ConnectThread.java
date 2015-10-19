@@ -26,7 +26,7 @@ public class ConnectThread extends Thread {
 
         // Get a BluetoothSocket to connect with the given BluetoothDevice
         try {
-            // MY_UUID is the app's UUID string, also used by the server code
+            // DEFAULT_SERIAL_UUID is the app's UUID string, also used by the server code
             tmp = device.createRfcommSocketToServiceRecord(UUID.fromString(DEFAULT_SERIAL_UUID));
         } catch (IOException e) {
             e.printStackTrace();
